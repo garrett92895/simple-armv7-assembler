@@ -1,0 +1,63 @@
+Program ::= Instruction | Program + Instruction
+
+Instruction ::= Operation | Label + Operation | LabeledData | LabeledRegister
+
+LabeledData ::= Label + Number
+
+LabeledRegister ::= Label + Register
+
+Label ::= Name + ":"
+
+Operation ::= SimpleArithmeticLogicOpBase + SimpleArithmeticLogicParams | ConditionSetterOpBase + ConditionSetterParams | MulOpBase + MulParams | BranchOpBase + Number | MovOpBase + UniRegisterImm | LdrStrOpBase + BiRegisterImm | DivOpBase + TriRegister
+
+SimpleArithmeticLogicOpBase ::= "ADC" + Condition | "ADD" + Condition | "ADD" + Condition | "AND" + Condition | "EOR" + Condition | "ORR" + Condition | "SBC" + Condition | "SUB" + Condition
+
+ConditionSetterOpBase ::= "CMP" + Condition
+
+MulOpBase ::= "MUL" + Condition
+
+BranchOpBase ::= "B" + Condition
+
+MovOpBase ::= "MOVW" + Condition | "MOVT" + Condition
+
+LdrStrOpBase ::= "LDR" + Condition | "STR" + Condition
+
+DivOpBase ::= "SDIV" + Condition | "UDIV" + Condition
+
+SimpleArithmeticLogicParams ::= "I" + BiRegisterImm  | "I" + "S" + BiRegisterImm | TriRegisterImm | "S" + TriRegisterImm
+
+ConditionSetterParams ::= "I" + UniRegisterImm | BiRegisterImm
+
+MulParams ::= "S" + TriRegister | TriRegister
+
+TriRegisterImm ::= Register + "," + BiRegisterImm
+
+BiRegisterImm ::= Register + "," + Register + "," + UniRegisterImm 
+
+UniRegisterImm ::= Register + "," Number
+
+TriRegister ::= Register + "," + Register + "," + Register
+
+Register ::= "R" + "0" | "R" + "1" | ... | "R" + "15"
+
+Condition ::= "EQ" | "NE" | "LT" | "LE" | "GT" | "GE"
+
+Name ::= Alpha | Name + AlphaNum
+
+AlphaNum ::= Alpha | Digit
+
+Number ::= Dec | Hex
+
+Dec ::= Digit | Dec + Digit
+
+Hex ::= "0x" + HexValue 
+
+HexValue ::= HexDigit | HexValue + HexDigit
+
+HexDigit ::= Digit | "A" | "B" | ... | "F"
+
+Alpha ::= "A" | "B" | ... | "Z"
+
+Digit ::= "0" | "1" | ... | "9"
+
+Operations Needed : AND, ORR, ADD, SUB, B, 
