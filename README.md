@@ -10,11 +10,11 @@ It currently does not support exchanges to Thumb or Jazelle instruction sets
 Syntax
 ------
 Where <> means optional
-* <{Label}:> {OpCode} <{Condition}> <{Options}> {Params}
+```<{Label}:> {OpCode} <{Condition}> <{Options}> {Params}```
 or
-* {Label}: R{RegisterNum}
+```{Label}: R{RegisterNum}```
 or
-* {Label}: <0x>{Num}
+```{Label}: <0x>{Num}```
 
 `{Options}` can include "I" and/or "S" where "I" means immediate and "S" means that the instruction will update the condition flags based on the result
 
