@@ -15,10 +15,6 @@ Where <> means optional
 
 or
 
-	{Label}: R{RegisterNum}
-
-or
-
 	{Label}: <0x>{Num}
 
 `{Options}` can include "I" and/or "S" where "I" means immediate and "S" means that the instruction will update the condition flags based on the result
