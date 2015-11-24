@@ -14,8 +14,8 @@ if len(sys.argv) <= 2:
 source_file = sys.argv[1]
 destination_file = sys.argv[2]
 
-with sourcestream.filereader.fromFilePath(source_file) as source, generator.fromFilePath(destination_file) as sink:
-    parser.fromGenerator(sink)
-    tokenizer = tokenizer.Tokenizer(source, sink)
+with sourcestream.filereader(source_file) as source, generator(destination_file) as sink:
+    parser = parser.fromGenerator(sink)
+    tokenizer = tokenizer.Tokenizer(source)
 
     #While source.nextChar() not at EOF

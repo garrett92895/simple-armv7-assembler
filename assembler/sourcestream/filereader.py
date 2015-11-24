@@ -17,6 +17,9 @@ class FileReader():
     def nextChar(self):
         return self.f.read(1)
 
+    def nextChars(self, num_chars):
+        return self.f.read(num_chars)
+
     def nextUntilDelimiter(self, *delimiters):
         chars = []
         current_char = self.nextChar()
@@ -25,7 +28,7 @@ class FileReader():
             keep_reading = True
             while keep_reading:
                 chars.append(current_char)
-                keep_reading = current_char any(map(lambda d : re.match(d, current_char), delimiters))
+                keep_reading = any(map(lambda d : re.match(d, current_char), delimiters))
                 current_char = self.nextChar()
             
         else:

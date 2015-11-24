@@ -1,14 +1,12 @@
 Program ::= Instruction | Program + Instruction
 
-Instruction ::= Operation | Label + Operation | LabeledData
-
-LabeledData ::= Label + Number
+Instruction ::= Operation | Label + Operation
 
 Label ::= Name + ":"
 
 Operation ::= SimpleArithmeticLogicOpBase + SimpleArithmeticLogicParams | ConditionSetterOpBase + ConditionSetterParams | MulOpBase + MulParams | BranchOpBase + Number | MovOpBase + UniRegisterImm | LdrStrOpBase + LdrStrParams | DivOpBase + TriRegister
 
-SimpleArithmeticLogicOpBase ::= "ADC" + Condition | "ADD" + Condition | "ADD" + Condition | "AND" + Condition | "EOR" + Condition | "ORR" + Condition | "SBC" + Condition | "SUB" + Condition
+SimpleArithmeticLogicOpBase ::= "ADC" + Condition | "ADD" + Condition | "AND" + Condition | "EOR" + Condition | "ORR" + Condition | "SBC" + Condition | "SUB" + Condition
 
 ConditionSetterOpBase ::= "CMP" + Condition
 
