@@ -3,10 +3,11 @@
 Encodes simple assembly into ARMv7-A machine code
 """
 import sys
-import sourcestream.filereader
+
+import sourcestream.filereader as filereader
 import tokenizer
 import parser
-import generator
+import parser.generator as generator
 
 if len(sys.argv) <= 2:
     raise ValueError('Need to specify and source code and output file')
@@ -14,8 +15,12 @@ if len(sys.argv) <= 2:
 source_file = sys.argv[1]
 destination_file = sys.argv[2]
 
-with sourcestream.filereader(source_file) as source, generator(destination_file) as sink:
-    parser = parser.fromGenerator(sink)
-    tokenizer = tokenizer.Tokenizer(source)
+with filereader(source_file) as source, generator(destination_file) as sink:
+    the_parser = parser.fromGenerator(sink)
+    the_tokenizer = tokenizer.Tokenizer(source)
 
-    #While source.nextChar() not at EOF
+    next_token = the_tokenizer.get_next_token()
+    while(next_token):
+        the_parser.add_token(next_token)
+        the_parser.parse()
+        next_token = the_tokenizer.get_next_token()
