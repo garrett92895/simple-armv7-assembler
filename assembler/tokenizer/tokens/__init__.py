@@ -1,7 +1,7 @@
 """
 
 """
-import tokens.tokentype as tokentype
+import tokentype as tokentype
 
 class Token:
     def __init__(self, token_type, value):
@@ -17,8 +17,8 @@ class State:
     @classmethod
     def fromState(cls, state, eval_method):
         new_state = State(eval_method)
-        new_state.tokens(state.tokens)
-        new_state.token_builder_string(state.token_builder_string)
+        new_state.tokens = state.tokens
+        new_state.token_builder_string = state.token_builder_string
         return new_state
 
     def evaluate(self, char):
@@ -32,32 +32,32 @@ class State:
         self.token_builder_string = ""
 
     def has_tokens(self):
-        return len(tokens) == 0
+        return len(self.tokens) != 0
 
-    def pop_token(self):
+    def next_token(self):
         return self.tokens.pop()
 
 def change_state(state, new_state_name):
     eval_method = None
 
     if new_state_name == "a":
-        eval_method = a_state_eval()
+        eval_method = a_state_eval
     elif new_state_name == "b":
-        eval_method = b_state_eval()
+        eval_method = b_state_eval
     elif new_state_name == "c":
-        eval_method = c_state_eval()
+        eval_method = c_state_eval
     elif new_state_name == "d":
-        eval_method = d_state_eval()
+        eval_method = d_state_eval
     elif new_state_name == "e":
-        eval_method = e_state_eval()
+        eval_method = e_state_eval
     elif new_state_name == "f":
-        eval_method = f_state_eval()
+        eval_method = f_state_eval
     elif new_state_name == "g":
-        eval_method = g_state_eval()
+        eval_method = g_state_eval
     elif new_state_name == "h":
-        eval_method = h_state_eval()
+        eval_method = h_state_eval
     elif new_state_name == "i":
-        eval_method = i_state_eval()
+        eval_method = i_state_eval
     else:
         raise ValueError("State " + str(new_state_name) + " does not exist")
 
@@ -79,8 +79,8 @@ def a_state_eval(state, char):
         return append_and_change_state(state, char, "c")
     elif char.isdigit():
         return append_and_change_state(state, char, "e")
-    elif char == "\\":
-        return append_and_change_state(state, char, "g")
+    elif char == "/":
+        return change_state(state, "g")
     elif char == "*":
         throw(state, "\"*\" not acceptable here")
     else:
@@ -100,16 +100,17 @@ def b_state_eval(state, char):
     elif char.isdigit():
         state.add_char(char)
         return state
-    elif char == "\\":
+    elif char == "/":
         token = Token(tokentype.AlphaNum, state.token_builder_string)
         state.add_token(token)
-        return change_state(state, "f")
+        return change_state(state, "g")
     elif char == "*":
         throw(state, "\"*\" not acceptable here")
     else:
         token = Token(tokentype.AlphaNum, state.token_builder_string)
         state.add_token(token)
-        return change_state(state, "g")
+        state.add_char(char)
+        return change_state(state, "f")
 
 def c_state_eval(state, char):
     if char.isspace():
@@ -124,7 +125,7 @@ def c_state_eval(state, char):
         return append_and_change_state(state, char, "e")
     elif char.isdigit():
         return append_and_change_state(state, char, "e")
-    elif char == "\\":
+    elif char == "/":
         token = Token(tokentype.Dec, state.token_builder_string)
         state.add_token(token)
         return change_state(state, "g")
@@ -147,7 +148,7 @@ def d_state_eval(state, char):
     elif char.isdigit():
         state.add_char(char)
         return state
-    elif char == "\\":
+    elif char == "/":
         token = Token(tokentype.Hex, state.token_builder_string)
         state.add_token(token)
         return change_state(state, "g")
@@ -169,7 +170,7 @@ def e_state_eval(state, char):
     elif char.isdigit():
         state.add_char(char)
         return state
-    elif char == "\\":
+    elif char == "/":
         token = Token(tokentype.Dec, state.token_builder_string)
         state.add_token(token)
         return change_state(state, "g")
@@ -201,7 +202,7 @@ def f_state_eval(state, char):
         state.add_token(token)
         state.add_char(char)
         return change_state(state, "e")
-    elif char == "\\":
+    elif char == "/":
         token = Token(tokentype.SpecialChar, state.token_builder_string)
         state.add_token(token)
         return change_state(state, "g")
@@ -222,11 +223,11 @@ def g_state_eval(state, char):
 def h_state_eval(state, char):
     if char == "*":
         return change_state(state, "i")
-    else
+    else:
         return state
 
 def i_state_eval(state, char):
-    if char == "\\":
+    if char == "/":
         return change_state(state, "a")
     elif char == "*":
         return state

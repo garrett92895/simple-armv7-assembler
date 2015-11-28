@@ -14,13 +14,13 @@ class FileReader():
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self.f.close()
 
-    def nextChar(self):
+    def next_char(self):
         return self.f.read(1)
 
-    def nextChars(self, num_chars):
+    def next_chars(self, num_chars):
         return self.f.read(num_chars)
 
-    def nextUntilDelimiter(self, *delimiters):
+    def next_until_delimiter(self, *delimiters):
         chars = []
         current_char = self.nextChar()
 
