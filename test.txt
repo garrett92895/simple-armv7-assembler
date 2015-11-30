@@ -1,0 +1,13 @@
+branchalwaysthing: bal loop 
+movwal r1,0x434
+SDIVal r2,r0,r6
+loop: adceqi r1,r10,0x1414
+addneis r1,r2,0x4333 
+ANDlt r2,r15,r0,0x33
+eorLEs r10, r10,r0,0x44
+orrGTi r0,r9,0x43
+sbcGEi r0,r9,0x0
+subALi r0,r1,0xf888 
+cmpALi r0,0x343
+cmpAL r0,r2,0x344
+MULalS r0,r0,r0

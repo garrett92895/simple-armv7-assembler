@@ -1,12 +1,5 @@
-"""
-
-"""
-import tokentype as tokentype
-
-class Token:
-    def __init__(self, token_type, value):
-        self.token_type = token_type
-        self.value = value
+from . import tokens
+from . import tokentype
 
 class State:
     def __init__(self, eval_method):
@@ -88,7 +81,7 @@ def a_state_eval(state, char):
 
 def b_state_eval(state, char):
     if char.isspace():
-        token = Token(tokentype.AlphaNum, state.token_builder_string)
+        token = tokens.Token(tokentype.AlphaNum, state.token_builder_string)
         state.add_token(token)
         return change_state(state, "a")
     elif char.isalpha():
@@ -101,20 +94,20 @@ def b_state_eval(state, char):
         state.add_char(char)
         return state
     elif char == "/":
-        token = Token(tokentype.AlphaNum, state.token_builder_string)
+        token = tokens.Token(tokentype.AlphaNum, state.token_builder_string)
         state.add_token(token)
         return change_state(state, "g")
     elif char == "*":
         throw(state, "\"*\" not acceptable here")
     else:
-        token = Token(tokentype.AlphaNum, state.token_builder_string)
+        token = tokens.Token(tokentype.AlphaNum, state.token_builder_string)
         state.add_token(token)
         state.add_char(char)
         return change_state(state, "f")
 
 def c_state_eval(state, char):
     if char.isspace():
-        token = Token(tokentype.Dec, state.token_builder_string)
+        token = tokens.Token(tokentype.Dec, state.token_builder_string)
         state.add_token(token)
         return change_state(state, "a")
     elif char == "x":
@@ -126,20 +119,20 @@ def c_state_eval(state, char):
     elif char.isdigit():
         return append_and_change_state(state, char, "e")
     elif char == "/":
-        token = Token(tokentype.Dec, state.token_builder_string)
+        token = tokens.Token(tokentype.Dec, state.token_builder_string)
         state.add_token(token)
         return change_state(state, "g")
     elif char == "*":
         throw(state, "\"*\" not acceptable here")
     else:
-        token = Token(tokentype.Dec, state.token_builder_string)
+        token = tokens.Token(tokentype.Dec, state.token_builder_string)
         state.add_token(token)
         state.add_char(char)
         return change_state(state, "f")
         
 def d_state_eval(state, char):
     if char.isspace():
-        token = Token(tokentype.Hex, state.token_builder_string)
+        token = tokens.Token(tokentype.Hex, state.token_builder_string)
         state.add_token(token)
         return change_state(state, "a")
     elif char.isalpha():
@@ -149,20 +142,20 @@ def d_state_eval(state, char):
         state.add_char(char)
         return state
     elif char == "/":
-        token = Token(tokentype.Hex, state.token_builder_string)
+        token = tokens.Token(tokentype.Hex, state.token_builder_string)
         state.add_token(token)
         return change_state(state, "g")
     elif char == "*":
         throw(state, "\"*\" not acceptable here")
     else:
-        token = Token(tokentype.Hex, state.token_builder_string)
+        token = tokens.Token(tokentype.Hex, state.token_builder_string)
         state.add_token(token)
         state.add_char(char)
         return change_state(state, "f")
 
 def e_state_eval(state, char):
     if char.isspace():
-        token = Token(tokentype.Dec, state.token_builder_string)
+        token = tokens.Token(tokentype.Dec, state.token_builder_string)
         state.add_token(token)
         return change_state(state, "a")
     elif char.isalpha():
@@ -171,45 +164,45 @@ def e_state_eval(state, char):
         state.add_char(char)
         return state
     elif char == "/":
-        token = Token(tokentype.Dec, state.token_builder_string)
+        token = tokens.Token(tokentype.Dec, state.token_builder_string)
         state.add_token(token)
         return change_state(state, "g")
     elif char == "*":
         throw(state, "\"*\" not acceptable here")
     else:
-        token = Token(tokentype.Dec, state.token_builder_string)
+        token = tokens.Token(tokentype.Dec, state.token_builder_string)
         state.add_token(token)
         state.add_char(char)
         return change_state(state, "f")
 
 def f_state_eval(state, char):
     if char.isspace():
-        token = Token(tokentype.SpecialChar, state.token_builder_string)
+        token = tokens.Token(tokentype.SpecialChar, state.token_builder_string)
         state.add_token(token)
         return change_state(state, "a")
     elif char.isalpha():
-        token = Token(tokentype.SpecialChar, state.token_builder_string)
+        token = tokens.Token(tokentype.SpecialChar, state.token_builder_string)
         state.add_token(token)
         state.add_char(char)
         return change_state(state, "b")
     elif char == "0":
-        token = Token(tokentype.SpecialChar, state.token_builder_string)
+        token = tokens.Token(tokentype.SpecialChar, state.token_builder_string)
         state.add_token(token)
         state.add_char(char)
         return change_state(state, "c")
     elif char.isdigit():
-        token = Token(tokentype.SpecialChar, state.token_builder_string)
+        token = tokens.Token(tokentype.SpecialChar, state.token_builder_string)
         state.add_token(token)
         state.add_char(char)
         return change_state(state, "e")
     elif char == "/":
-        token = Token(tokentype.SpecialChar, state.token_builder_string)
+        token = tokens.Token(tokentype.SpecialChar, state.token_builder_string)
         state.add_token(token)
         return change_state(state, "g")
     elif char == "*":
         throw(state, "\"*\" not acceptable here")
     else:
-        token = Token(tokentype.SpecialChar, state.token_builder_string)
+        token = tokens.Token(tokentype.SpecialChar, state.token_builder_string)
         state.add_token(token)
         state.add_char(char)
         return change_state(state, "f")

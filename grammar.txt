@@ -4,7 +4,7 @@ Instruction ::= Operation | Label + Operation
 
 Label ::= Name + ":"
 
-Operation ::= SimpleArithmeticLogicOpBase + SimpleArithmeticLogicParams | ConditionSetterOpBase + ConditionSetterParams | MulOpBase + MulParams | BranchOpBase + Number | MovOpBase + UniRegisterImm | LdrStrOpBase + LdrStrParams | DivOpBase + TriRegister
+Operation ::= SimpleArithmeticLogicOpBase + SimpleArithmeticLogicParams | ConditionSetterOpBase + ConditionSetterParams | MulOpBase + MulParams | BranchOpBase + Name | MovOpBase + UniRegisterImm | LdrStrOpBase + LdrStrParams | DivOpBase + TriRegister
 
 SimpleArithmeticLogicOpBase ::= "ADC" + Condition | "ADD" + Condition | "AND" + Condition | "EOR" + Condition | "ORR" + Condition | "SBC" + Condition | "SUB" + Condition
 
@@ -30,7 +30,7 @@ MulParams ::= "S" + TriRegister | TriRegister
 
 TriRegisterImm ::= Register + "," + BiRegisterImm
 
-BiRegisterImm ::= Register + "," + Register + "," + UniRegisterImm 
+BiRegisterImm ::= Register + "," + UniRegisterImm 
 
 UniRegisterImm ::= Register + "," Number
 

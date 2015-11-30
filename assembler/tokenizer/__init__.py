@@ -1,12 +1,10 @@
-"""
-
-"""
-import tokens
+from . import tokens
+from . import state as token_state
 
 class Tokenizer:
     def __init__(self, source):
         self.source_stream = source
-        self.state = tokens.initial_state()
+        self.state = token_state.initial_state()
 
     def get_next_token(self):
         while not self.state.has_tokens():

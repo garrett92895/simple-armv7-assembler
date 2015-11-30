@@ -1,2 +1,0 @@
-label: bal r0,12,0xFF323 /* sdfsdf *****/
-mov r1,r2,0x434
