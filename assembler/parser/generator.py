@@ -1,3 +1,5 @@
+import array
+
 from assembler.tokenizer import tokentype
 
 def condition_bytes(condition):
@@ -46,6 +48,8 @@ class Generator:
     def __init__(self, file_path):
         self.file_path = file_path
         self.labels = {}
+        self.byte_buffer = array.array('I')
+        self.byte_buffer.append(0)
         self.unresolved_label_refs = {}
         self.instruction_counter = 0
 
@@ -54,21 +58,44 @@ class Generator:
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        #reloop over file and replace necessary labels
         self.f.close()
+        #reloop over file and replace necessary labels
+        self.resolve_label_refs()
 
-    def get_relative_address(self, instruction_counter_num):
-        difference = self.instruction_counter - instruction_counter_num
-        difference *= -1
-        difference -= 2
+    def resolve_label_refs(self):
+        self.f = open(self.file_path, "rb+")
         
+        for instruction_index, label_name in self.unresolved_label_refs.items():
+            label_instruction_index = self.labels[label_name]
+            address = self.get_signed_relative_address(label_instruction_index, instruction_index)
+
+            seek_point = (instruction_index * 4) 
+            self.f.seek(seek_point)
+            instruction = int.from_bytes(self.f.read(4), byteorder='little')
+            self.f.seek(seek_point)
+
+            bytecode = address | instruction
+
+            address_byte_array = array.array('I')
+            address_byte_array.append(bytecode)
+            self.f.write(address_byte_array.tobytes())
+
+    def get_signed_relative_address(self, instruction1_index, instruction2_index):
+        difference = instruction1_index - instruction2_index
+        difference -= 2
+        address = 0x000000
+
+        if difference < 0:
+            address = 0xFFFFFE
+        address += difference
+        
+        return address
 
     def write_instruction(self, instruction_token):
         label = instruction_token.value[0]
         instruction = instruction_token.value[1]
         if label:
             self.labels[label.value] = self.instruction_counter
-
 
         operation_token = instruction_token.value[1]
         if operation_token.token_type == tokentype.SimpleArithmeticLogicOperation:
@@ -87,8 +114,13 @@ class Generator:
             encoding_method = self.div_operation_encoding
 
         bytecode = encoding_method(instruction)
-        #TODO writeout bytes after switching to little endian
+        self.write_bytes(bytecode)
         self.instruction_counter += 1
+
+    #TODO implement so that buffering is actually implemented
+    def write_bytes(self, bytecode):
+        self.byte_buffer[0] = bytecode
+        self.f.write(self.byte_buffer.tobytes())
 
     def simple_arithmetic_logic_encoding(self, instruction):
         operation = instruction.value[0]
@@ -156,10 +188,10 @@ class Generator:
             bytecode |= 0x05000000
             if label in self.labels:
                 label_address = self.labels[label]
-                address = self.get_relative_address(label_address)
+                address = self.get_signed_relative_address(self.instruction_counter, label_address)
                 bytecode |= address
             else:
-                self.unresolved_future_refs[self.instruction_counter] = label
+                self.unresolved_label_refs[self.instruction_counter] = label
     
         return bytecode
     
