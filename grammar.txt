@@ -24,7 +24,7 @@ SimpleArithmeticLogicParams ::= "I" + BiRegisterImm  | "I" + "S" + BiRegisterImm
 
 ConditionSetterParams ::= "I" + UniRegisterImm | BiRegisterImm
 
-LdrStrParams ::= "I" + "W" + BiRegisterImm
+LdrStrParams ::= "I" + BiRegisterImm | "W" + BiRegisterImm | "I" + "W" + BiRegisterImm
 
 MulParams ::= "S" + TriRegister | TriRegister
 

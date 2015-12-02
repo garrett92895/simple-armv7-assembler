@@ -166,7 +166,7 @@ class Parser:
         if first_token.token_type == tokentype.AlphaNum and operation_parser.valid_op(first_token.value, "ldrstr", 3):
             options = first_token.value[5:].upper()
             parameter_token = None
-            if options == "IW":
+            if options == "I" or options == "W" or options == "IW":
                 parameter_token = self.parse_bi_register_imm()
            
             if parameter_token:
