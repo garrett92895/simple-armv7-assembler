@@ -43,6 +43,12 @@ def get_operation_values(operation, code_upper):
     options = operation_literal[code_upper + 2:].upper()
     return operation_code, condition, options
 
+def from_bi_register_imm(params):
+    destination_register = params.value[0].value
+    operand_register = params.value[1].value[0].value
+    imm = params.value[1].value[1].value
+
+    return destination_register, operand_register, imm
 
 class Generator:
     def __init__(self, file_path):
@@ -82,7 +88,6 @@ class Generator:
 
     def get_signed_relative_address(self, instruction1_index, instruction2_index):
         difference = instruction1_index - instruction2_index
-        difference -= 2
         address = 0x000000
 
         if difference < 0:
@@ -124,10 +129,10 @@ class Generator:
 
     def simple_arithmetic_logic_encoding(self, instruction):
         operation = instruction.value[0]
+        params = instruction.value[1]
         operation_code, condition, options = get_operation_values(operation, 3)
-    
-        bytecode = 0x00000000
-        bytecode |= condition
+        bytecode = condition
+
         if "S" in options:
             bytecode |= 0x00100000
     
@@ -135,8 +140,17 @@ class Generator:
             #TODO
             print("TODO")
         elif operation_code == "ADD":
-            #TODO
-            print("TODO")
+            bytecode |= 0x00800000
+            if "I" in options:
+                bytecode |= 0x02000000
+                destination_register, operand_register, imm = from_bi_register_imm(params)
+                operand_register = operand_register << 16
+                destination_register = destination_register << 12
+                imm = int(imm, 0)
+                bytecode |= operand_register | destination_register | imm
+            else:
+                #TODO
+                print("TODO")
         elif operation_code == "AND":
             #TODO
             print("TODO")
@@ -150,8 +164,17 @@ class Generator:
             #TODO
             print("TODO")
         elif operation_code == "SUB":
-            #TODO
-            print("TODO")
+            bytecode |= 0x00400000
+            if "I" in options:
+                bytecode |= 0x02000000
+                destination_register, operand_register, imm = from_bi_register_imm(params)
+                operand_register = operand_register << 16
+                destination_register = destination_register << 12
+                imm = int(imm, 0)
+                bytecode |= operand_register | destination_register | imm
+            else:
+                #TODO
+                print("TODO")
 
         return bytecode
     
@@ -185,10 +208,10 @@ class Generator:
         label = params.value
     
         if operation_code == "B":
-            bytecode |= 0x05000000
+            bytecode |= 0x0A000000
             if label in self.labels:
                 label_address = self.labels[label]
-                address = self.get_signed_relative_address(self.instruction_counter, label_address)
+                address = self.get_signed_relative_address(label_address, self.instruction_counter)
                 bytecode |= address
             else:
                 self.unresolved_label_refs[self.instruction_counter] = label

@@ -1,0 +1,5 @@
+TODO 
+- allow for decimals instead of hex for immediate values
+- provide better/more syntax errors 
+	- line numbers
+- allow for less strict size of immediate values (e.x. MOVW requires 4 digits in imm value such as 0x024f, allow for 0x24f as well)

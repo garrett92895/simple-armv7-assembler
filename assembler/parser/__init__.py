@@ -51,7 +51,6 @@ class Parser:
         instruction = None
         label = self.parse_label()
         operation = self.parse_operation()
-
         if operation:
             instruction = self.make_operation_instruction(label, operation)
         if instruction: 

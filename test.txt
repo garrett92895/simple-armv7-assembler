@@ -10,9 +10,10 @@ sbcGEi r0,r9,0x0
 subALi r0,r1,0xf888 
 cmpALi r0,0x343
 cmpAL r0,r2,0x344
-MULalS r0,r0,r0 */
+MULalS r0,r0,r0
 movwAL r3,0x2412 
 loop: LDRalI r0,r1,0x322
 BAL loop
 BAL loop2
-loop2: STRalI r0,r1,0x341
+loop2: STRalI r0,r1,0x341 */
+ADDalI r0,r2,0x234
