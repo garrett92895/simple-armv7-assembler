@@ -2,6 +2,7 @@ from assembler.tokenizer import tokentype
 from assembler.tokenizer import tokens
 from . import operation_parser
 
+
 class Parser:
     def __init__(self):
         self.token_stack = []
@@ -94,6 +95,10 @@ class Parser:
             operation = self.parse_ldrstr()
         if not operation:
             operation = self.parse_division()
+        if not operation:
+            operation = self.parse_push()
+        if not operation:
+            operation = self.parse_pop()
         return operation
 
     # Checks validity from top of stack to bottom
@@ -101,11 +106,11 @@ class Parser:
         top_token = self.pop()
         if top_token.token_type == tokentype.AlphaNum:
             second_token = self.pop() 
-            if (second_token.token_type == tokentype.AlphaNum
-                and operation_parser.valid_op(second_token.value, "branch", 1)):
-                operation_token = tokens.Token.fromChildren(tokentype.BranchOperation, second_token, top_token)
-                self.add_token(operation_token)
-                return operation_token
+            if second_token.token_type == tokentype.AlphaNum:
+                if operation_parser.valid_op(second_token.value, "branch", 1) or operation_parser.valid_op(second_token.value, "branch", 2):
+                    operation_token = tokens.Token.fromChildren(tokentype.BranchOperation, second_token, top_token)
+                    self.add_token(operation_token)
+                    return operation_token
             if second_token and second_token.token_type != tokentype.NullType:
                 self.add_token(second_token)
         if top_token:
@@ -177,17 +182,24 @@ class Parser:
 
     def parse_mov(self):
         first_token = self.unparsed_token_at(0)
-        if first_token.token_type == tokentype.AlphaNum and operation_parser.valid_op(first_token.value, "mov", 4):
-            options = first_token.value[6:].upper()
+        if first_token.token_type == tokentype.AlphaNum:
+            options = None
             parameter_token = None
-            if options == "":
-                parameter_token = self.parse_uni_register_imm()
+            if operation_parser.valid_op(first_token.value, "mov", 4):
+                options = first_token.value[6:].upper()
+                if options == "":
+                    parameter_token = self.parse_uni_register_imm()
+            elif operation_parser.valid_op(first_token.value, "mov", 3):
+                options = first_token.value[5:].upper()
+                parameter_token = self.parse_bi_register()
+
             if parameter_token:
                 self.pop()
                 self.pop()
                 operation_token = tokens.Token.fromChildren(tokentype.MovOperation, first_token, parameter_token)
-                self.add_token(operation_token) 
+                self.add_token(operation_token)
                 return operation_token
+
 
     def parse_division(self):
         first_token = self.unparsed_token_at(0)
@@ -202,6 +214,30 @@ class Parser:
                 self.pop()
                 operation_token = tokens.Token.fromChildren(tokentype.DivOperation, first_token, parameter_token)
                 self.add_token(operation_token) 
+                return operation_token
+
+    def parse_push(self):
+        first_token = self.unparsed_token_at(0)
+        if first_token.token_type == tokentype.AlphaNum and operation_parser.valid_op(first_token.value, "push", 4):
+            parameter_token = self.parse_register()
+
+            if parameter_token:
+                self.pop()
+                self.pop()
+                operation_token = tokens.Token.fromChildren(tokentype.PushPopOperation, first_token, parameter_token)
+                self.add_token(operation_token)
+                return operation_token
+
+    def parse_pop(self):
+        first_token = self.unparsed_token_at(0)
+        if first_token.token_type == tokentype.AlphaNum and operation_parser.valid_op(first_token.value, "pop", 3):
+            parameter_token = self.parse_register()
+
+            if parameter_token:
+                self.pop()
+                self.pop()
+                operation_token = tokens.Token.fromChildren(tokentype.PushPopOperation, first_token, parameter_token)
+                self.add_token(operation_token)
                 return operation_token
 
     def parse_tri_register(self):
@@ -243,6 +279,22 @@ class Parser:
             else:
                 self.add_token(comma)
                 self.add_token(bi_register_imm)
+
+    def parse_bi_register(self):
+        register2 = self.parse_register()
+        if register2:
+            precomma = self.pop()
+            comma = self.pop()
+            if tokentype.is_comma(comma):
+                register1 = self.parse_register()
+                if register1:
+                    self.pop()
+                    operation_token = tokens.Token.fromChildren(tokentype.BiRegister, register1, register2)
+                    self.add_token(operation_token)
+                    return operation_token
+            if comma and comma.token_type != tokentype.NullType:
+                self.add_token(comma)
+            self.add_token(register2)
 
     def parse_bi_register_imm(self):
         uni_register_imm = self.parse_uni_register_imm()

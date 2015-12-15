@@ -2,46 +2,49 @@ import array
 
 from assembler.tokenizer import tokentype
 
-def condition_bytes(condition):
+
+def get_condition_bytes(condition):
     condition_bytes = 0x00000000
     if condition == "AL":
         condition_bytes = 0xE0000000
     elif condition == "CS":
-        conditin_bytes = 0x20000000
+        condition_bytes = 0x20000000
     elif condition == "NE":
         condition_bytes = 0x10000000
     elif condition == "CC":
-        conditin_bytes = 0x30000000
+        condition_bytes = 0x30000000
     elif condition == "MI":
-        conditin_bytes = 0x40000000
+        condition_bytes = 0x40000000
     elif condition == "PL":
-        conditin_bytes = 0x50000000
+        condition_bytes = 0x50000000
     elif condition == "VS":
         condition_bytes = 0x60000000 
     elif condition == "VC":
         condition_bytes = 0x70000000
     elif condition == "HI":
-        condiiton_bytes = 0x80000000
+        condition_bytes = 0x80000000
     elif condition == "LS":
         condition_bytes = 0x90000000
     elif condition == "GE":
-        conditin_bytes = 0xA0000000
+        condition_bytes = 0xA0000000
     elif condition == "LT":
-        conditin_bytes = 0xB0000000
+        condition_bytes = 0xB0000000
     elif condition == "GT":
-        conditin_bytes = 0xC0000000
+        condition_bytes = 0xC0000000
     elif condition == "LE":
-        conditin_bytes = 0xD0000000
+        condition_bytes = 0xD0000000
 
     return condition_bytes
+
 
 def get_operation_values(operation, code_upper):
     operation_literal = operation.value
     operation_code = operation_literal[:code_upper].upper()
     condition_string = operation_literal[code_upper:code_upper + 2].upper()
-    condition = condition_bytes(condition_string)
+    condition = get_condition_bytes(condition_string)
     options = operation_literal[code_upper + 2:].upper()
     return operation_code, condition, options
+
 
 def from_bi_register_imm(params):
     destination_register = params.value[0].value
@@ -49,6 +52,7 @@ def from_bi_register_imm(params):
     imm = params.value[1].value[1].value
 
     return destination_register, operand_register, imm
+
 
 class Generator:
     def __init__(self, file_path):
@@ -112,6 +116,8 @@ class Generator:
             encoding_method = self.ldrstr_operation_encoding
         elif operation_token.token_type == tokentype.DivOperation:
             encoding_method = self.div_operation_encoding
+        elif operation_token.token_type == tokentype.PushPopOperation:
+            encoding_method = self.pushpop_operation_encoding
 
         bytecode = encoding_method(instruction)
         print(hex(bytecode))
@@ -198,42 +204,55 @@ class Generator:
     def branch_operation_encoding(self, instruction):
         operation = instruction.value[0]
         params = instruction.value[1]
-        operation_code, condition, options = get_operation_values(operation, 1)
+        operation_code, condition, options = get_operation_values(operation, 2)
+        if operation_code != "BL":
+            operation_code, condition, options = get_operation_values(operation, 1)
         bytecode = condition
 
         label = params.value
     
         if operation_code == "B":
             bytecode |= 0x0A000000
-            if label in self.labels:
-                label_address = self.labels[label]
-                address = self.get_signed_relative_address(label_address, self.instruction_counter)
-                bytecode |= address
-            else:
-                self.unresolved_label_refs[self.instruction_counter] = label
-    
+        elif operation_code == "BL":
+            bytecode |= 0x0B000000
+
+        if label in self.labels:
+            label_address = self.labels[label]
+            address = self.get_signed_relative_address(label_address, self.instruction_counter)
+            bytecode |= address
+        else:
+            self.unresolved_label_refs[self.instruction_counter] = label
+
         return bytecode
     
     def mov_operation_encoding(self, instruction):
         operation = instruction.value[0]
         operation_code, condition, options = get_operation_values(operation, 4)
+        if operation_code not in ["MOVT", "MOVW"]:
+            operation_code, condition, options = get_operation_values(operation, 3)
         bytecode = condition
-        params = instruction.value[1]
-        register = params.value[0].value << 12
-    
-        imm = params.value[1].value[2:6]
-        hex_code = bytearray.fromhex(imm)
-        imm4 = (hex_code[0] >> 4) << 16
-        imm12 = ((hex_code[0] << 8) & 0x0f00) | hex_code[1]
-    
-        if operation_code == "MOVW":
-            bytecode |= 0x03000000
-        elif operation_code == "MOVT":
-            bytecode |= 0x03400000
-    
-        bytecode |= imm4 
-        bytecode |= imm12 
-        bytecode |= register
+
+        if operation_code == "MOV":
+            params = instruction.value[1]
+            register1 = params.value[0].value << 12
+            register2 = params.value[1].value
+            bytecode |= 0x01A00000 | register1 | register2
+        else:
+            params = instruction.value[1]
+            register = params.value[0].value << 12
+
+            imm = params.value[1].value[2:6]
+            hex_code = bytearray.fromhex(imm)
+            imm4 = (hex_code[0] >> 4) << 16
+            imm12 = ((hex_code[0] << 8) & 0x0f00) | hex_code[1]
+            if operation_code == "MOVW":
+                bytecode |= 0x03000000
+            elif operation_code == "MOVT":
+                bytecode |= 0x03400000
+
+            bytecode |= imm4
+            bytecode |= imm12
+            bytecode |= register
     
         return bytecode
     
@@ -257,7 +276,27 @@ class Generator:
         bytecode |= register1 | register2 | imm
     
         return bytecode
-    
+
+    def pushpop_operation_encoding(self, instruction):
+        operation = instruction.value[0]
+        operation_code, condition, options = get_operation_values(operation, 3)
+        if operation_code == "PUS":
+            operation_code, condition, options = get_operation_values(operation, 4)
+        bytecode = condition
+
+        params = instruction.value[1]
+        register = params.value << 12
+
+
+        if operation_code == "PUSH":
+            bytecode |= 0x05200000
+        elif operation_code == "POP":
+            bytecode |= 0x04900000
+
+        bytecode |= register | 0x000D0004
+
+        return bytecode
+
     def division_operation_encoding(self, instruction):
         operation = instruction.value[0]
         operation_code, condition, options = get_operation_values(operation, 3)

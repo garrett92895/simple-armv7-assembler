@@ -27,6 +27,3 @@ with filereader.FileReader(source_file) as source, generator.Generator(destinati
         if instruction:
             sink.write_instruction(instruction)
         next_token = the_tokenizer.get_next_token()
-
-    #get label table
-    #resolve label and overwrite addresses into file
