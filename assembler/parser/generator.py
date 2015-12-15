@@ -88,12 +88,7 @@ class Generator:
 
     def get_signed_relative_address(self, instruction1_index, instruction2_index):
         difference = instruction1_index - instruction2_index
-        address = 0x000000
-
-        if difference < 0:
-            address = 0xFFFFFE
-        address += difference
-        
+        address = (0xFFFFFE + difference) & 0x0FFFFFF
         return address
 
     def write_instruction(self, instruction_token):
@@ -119,6 +114,7 @@ class Generator:
             encoding_method = self.div_operation_encoding
 
         bytecode = encoding_method(instruction)
+        print(hex(bytecode))
         self.write_bytes(bytecode)
         self.instruction_counter += 1
 
