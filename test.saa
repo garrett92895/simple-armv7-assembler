@@ -8,8 +8,8 @@ ADDalI R1,R0,0x020 /* SET register */
 ADDalI R2,R0,0x02C /* CLEAR register */
 MOVWal R3,0x8000   /* number to write to SET or CLEAR registers */
 MOVTal R4,0x000A   /* the variable for the delay */
-MOVTal R5,0x3F20
 MOVWal R5,0x1000   /* UART base address */
+MOVTal R5,0x3F20
 
 /* Writes "H" */
 startLoop: MOVW R6,0x0048 /* "H" to R6 */
